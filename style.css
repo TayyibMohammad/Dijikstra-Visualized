@@ -1,0 +1,86 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+canvas{
+    border: 1px solid black;
+    display: block;
+    margin-top: 10px;
+    margin-left: 10px;
+    background-color: #fffefe;
+    height: 80vh;
+    width: 50vw;
+}
+
+#visualizer{
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+
+#pqstack{
+    width: 10vw;
+    height: 50vh;
+    border: 1px solid black;
+    /* margin-left: 20px; */
+    background-color: #fffefe;
+}
+
+#pqvisual{
+    padding-left: 20px;
+}
+
+#pqvisual h3{
+    margin-top: 10px;
+}
+
+#distancevisual{
+    align-self: flex-start;
+    margin-top: 10px;
+}
+
+table, th, td {
+  border: 1px solid black;
+  padding: 0;
+  margin: 0;
+}
+
+table {
+  /* Removes outer margin from the table element */
+  /* margin: 0; */
+  
+  /* Removes spacing between the borders of adjacent cells and merges them */
+  border-collapse: collapse;
+  /* Ensures no space is added around the table edges due to border-spacing */
+  border-spacing: 0; 
+  /* Ensures the border width is set to 0 */
+}
+
+/* Apply to table headers (<th>) and table data cells (<td>) */
+th, td {
+  /* Removes inner space between the content and the cell border */
+  padding: 10px;  
+  padding-right: 10px;
+  padding-left: 10px;
+  /* Ensures the border width is set to 0 for cells */
+  /* Margins have no effect on <td> and <th> elements by default */
+  /* margin: 0; */ 
+}
+
+#sliderDiv {
+    margin-top: 20px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#adjMatrix{
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.filled {
+    background-color: black !important;
+}

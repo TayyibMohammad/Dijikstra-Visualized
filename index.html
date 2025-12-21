@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijkstra-Visualize</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+</head>
+<body>
+    <div id="visualizer">
+        <canvas id="graphCanvas">
+    
+        </canvas>
+        
+        <div id="pqvisual">
+            <div id="pqstack">
+    
+            </div>
+            <h3>Priority Queue</h3>
+        </div>
+        <div id="distancevisual">
+            <table>
+                <tr>
+                    <th>Node</th>
+                    <th>Distance</th>
+                    <th>Parent</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="controls"> 
+        <div id="sliderDiv">
+            <div>
+                <input type="range" name="" id="" max="20" min="0" default="5">
+    
+                <p>Value of n = 5</p>
+
+            </div>
+            <span>Is Un-Directed?</span>
+            <input type="checkbox" name="" id="">
+
+        </div>
+        <div id="adjMatrix">
+
+        </div>
+    </div>
+</body>
+</html>

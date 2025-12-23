@@ -20,21 +20,27 @@ function resizeCanvas() {
     // drawNodes(slider.value); 
 }
 
+
+
 // Initial setup
 resizeCanvas();
 
 // Optional: Listen for window resize to keep it sharp if user moves browser
 window.addEventListener('resize', () => {
-
+    if(startNodeChoosen) return ;
+    nodes=[]
+    
     resizeCanvas();
     makeAdjMatrix(slider.value);
     addFunctionalityToCells();    
 
 });
 
-const nodes = [];
-const radius = 20;
-const padding = 3; // Extra space so they don't even get close
+var nodes = [];
+var startNode = null;
+var startNodeChoosen = false;
+const radius = 30;
+const padding = 5; // Extra space so they don't even get close
 
 function drawEdge(nodeA, nodeB){
     const startNode = nodes[nodeA];
@@ -87,11 +93,18 @@ function drawNode(x, y, radius, label){
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'black';
+    if(startNodeChoosen){
+        if(label===startNode){
+            ctx.fillStyle = '#ff0000ff';
+            ctx.fill()
+        }
+    }
     ctx.stroke();
 
     ctx.closePath();
 
     ctx.font = `${radius}px Arial`;
+
     ctx.fillStyle = 'black';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -110,6 +123,10 @@ const makeAdjMatrix = (n) => {
         for (let j = 0; j <= n; j++) {
             const cell = document.createElement('td');
             if(i===0 || j===0){
+
+                if((i===0 && j!=0)){
+                    cell.classList.add('header-cell');
+                }
                 
                 cell.innerText = (i===0 && j===0) ? "" : (i===0 ? j-1 : i-1);
                 cell.style.fontWeight = 'bold';
@@ -153,6 +170,7 @@ console.log(slider)
 
 
 slider.addEventListener('change', function() {
+    if(startNodeChoosen) return;
     nLabel.innerHTML="";
     var value = slider.value;
     nLabel.innerHTML = `Value of n is ${value}`;
@@ -161,6 +179,7 @@ slider.addEventListener('change', function() {
 });
 
 checkbox.addEventListener('change', function() {
+    if(startNodeChoosen) return ;
     isUnDirected = checkbox.checked;
     makeAdjMatrix(slider.value);
     addFunctionalityToCells();
@@ -169,7 +188,10 @@ checkbox.addEventListener('change', function() {
 
 const addFunctionalityToCells = () => {
 
+    if(startNodeChoosen) return ;
 
+    startNodeChoosen = false;
+    startNode = null;
     var cells = document.getElementsByClassName('matrix-cell');
     Array.from(cells).forEach(cell => {
         cell.addEventListener('click', function() {     
@@ -193,9 +215,48 @@ const addFunctionalityToCells = () => {
 
     });
 
+    var headerCells = document.getElementsByClassName('header-cell');
+    Array.from(headerCells).forEach(headerCell => {
+        headerCell.addEventListener('click', function() {
+
+            if(!startNodeChoosen){
+                startNode = parseInt(this.innerText);
+                startNodeChoosen = true;
+                NodeX = nodes[startNode].x;
+                NodeY = nodes[startNode].y;
+                drawNode(NodeX, NodeY, radius, startNode);
+                this.style.backgroundColor = '#ff0000ff';
+                const tableVisual = document.querySelector('#distancevisual table');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td classname='node'>${startNode}</td>
+                <td classname='distance'>0</td>
+                <td classname='parent'>-</td>`;
+                tableVisual.appendChild(row);
+                for(let i=0;i<nodes.length;i++){
+                    if(i!==startNode){
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td classname='node'>${i}</td>
+                        <td classname='distance'>∞</td>
+                        <td classname='parent'>-</td>`;
+                        tableVisual.appendChild(row);                        
+                    }
+                }
+
+                checkbox.disabled=true;
+                slider.disabled=true;
+            }
+        })
+    })    
+
+
 }
 
+
+
 addFunctionalityToCells();
+
+
 
 
 

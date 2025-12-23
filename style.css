@@ -39,6 +39,9 @@ canvas{
 #distancevisual{
     align-self: flex-start;
     margin-top: 10px;
+    margin-left: 20px;
+    max-height: 80vh;
+    overflow-y: scroll;
 }
 
 table, th, td {
@@ -83,4 +86,9 @@ th, td {
 
 .filled {
     background-color: black !important;
+}
+
+.header-cell:hover{ 
+    background-color: #fff700;
+    cursor: pointer;
 }

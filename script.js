@@ -1,5 +1,23 @@
 const canvas = document.getElementById('graphCanvas');
 const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const getIndex = (char) => {
+    return char.charCodeAt(0) - 'a'.charCodeAt(0);
+}
+
+const grayValue = (element) => {
+    const style = window.getComputedStyle(element);
+    const bgColor = style.backgroundColor;
+    const rgb = bgColor.match(/\d+/g);
+    if (rgb) {
+        const r = parseInt(rgb[0], 10);
+        const g = parseInt(rgb[1], 10);
+        const b = parseInt(rgb[2], 10);
+        // Calculate grayscale value using luminosity method
+        return Math.round(0.21 * r + 0.72 * g + 0.07 * b);
+    }
+}
 
 function resizeCanvas() {
     const dpr = window.devicePixelRatio || 1;
@@ -42,7 +60,7 @@ var startNodeChoosen = false;
 const radius = 30;
 const padding = 5; // Extra space so they don't even get close
 
-function drawEdge(nodeA, nodeB){
+function drawEdge(nodeA, nodeB, color){
     const startNode = nodes[nodeA];
     const endNode = nodes[nodeB];
 
@@ -51,8 +69,12 @@ function drawEdge(nodeA, nodeB){
     ctx.beginPath();
     ctx.moveTo(startNode.x, startNode.y);
     ctx.lineTo(endNode.x, endNode.y);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = color;
+    if(color==='white'){
+        ctx.lineWidth = 2;
+    }else{
+        ctx.lineWidth = 1;
+    }
     ctx.stroke();
     ctx.closePath();
 }
@@ -197,20 +219,34 @@ const addFunctionalityToCells = () => {
         cell.addEventListener('click', function() {     
             var cellX = this.classList[1].split('#')[0];
             var cellY = this.classList[1].split('#')[1]; 
-            if (this.style.backgroundColor === 'white' || this.style.backgroundColor === '' ) {
-                cell.classList.add('filled');
-                drawEdge(parseInt(cellX), parseInt(cellY))
+            
+            const grayV = grayValue(this);
+            console.log(grayV); 
+            if(grayV===0) {
+                var newGrayV=255;
+                drawEdge(parseInt(cellX), parseInt(cellY), 'white')
                 if(isUnDirected){
+
                     var symmetricCell = document.getElementsByClassName(cellY + '#' + cellX)[0];
-                    symmetricCell.classList.add('filled');
-                }
-            } else {
-                cell.classList.remove('filled');
-                if(isUnDirected){
-                    var symmetricCell = document.getElementsByClassName(cellY + '#' + cellX)[0];
-                    symmetricCell.classList.remove('filled');
+                    symmetricCell.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
                 }
             }
+            else{
+                const step = 25.5;
+
+                var newGrayV = Math.max(0, grayV - step);
+                console.log(newGrayV);
+                if(newGrayV===229.5){
+                    drawEdge(parseInt(cellX), parseInt(cellY), 'black')
+                }
+                if(isUnDirected){
+                    var symmetricCell = document.getElementsByClassName(cellY + '#' + cellX)[0];
+                    symmetricCell.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
+                }
+                
+            }
+            this.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
+            // var op
         })
 
     });

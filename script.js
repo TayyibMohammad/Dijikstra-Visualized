@@ -60,23 +60,53 @@ var startNodeChoosen = false;
 const radius = 30;
 const padding = 5; // Extra space so they don't even get close
 
+function drawArrow(x1, y1, x2, y2, radius = 30) {
+  const headLength = 12;
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+
+  // 1. Calculate the start and end points on the circles' perimeters
+  const startX = x1 + radius * Math.cos(angle);
+  const startY = y1 + radius * Math.sin(angle);
+  const endX = x2 - radius * Math.cos(angle);
+  const endY = y2 - radius * Math.sin(angle);
+
+  // 2. Draw the shaft (the line)
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 3. Draw the arrowhead at the edge of the destination node
+  ctx.beginPath();
+  ctx.moveTo(endX, endY);
+  ctx.lineTo(
+    endX - headLength * Math.cos(angle - Math.PI / 6),
+    endY - headLength * Math.sin(angle - Math.PI / 6)
+  );
+  ctx.lineTo(
+    endX - headLength * Math.cos(angle + Math.PI / 6),
+    endY - headLength * Math.sin(angle + Math.PI / 6)
+  );
+  ctx.closePath();
+  ctx.fillStyle = "#000";
+  ctx.fill();
+}
+
 function drawEdge(nodeA, nodeB, color){
     const startNode = nodes[nodeA];
     const endNode = nodes[nodeB];
 
     if(!startNode || !endNode) return;
-
-    ctx.beginPath();
-    ctx.moveTo(startNode.x, startNode.y);
-    ctx.lineTo(endNode.x, endNode.y);
-    ctx.strokeStyle = color;
-    if(color==='white'){
-        ctx.lineWidth = 2;
-    }else{
-        ctx.lineWidth = 1;
+    
+    if(isUnDirected){
+        drawArrow(startNode.x, startNode.y, endNode.x, endNode.y);
+        drawArrow(endNode.x, endNode.y, startNode.x, startNode.y);
     }
-    ctx.stroke();
-    ctx.closePath();
+    else{
+        drawArrow(startNode.x, startNode.y, endNode.x, endNode.y);
+    }
 }
 
 function isOverlapping(newX, newY) {

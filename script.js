@@ -60,8 +60,11 @@ var startNodeChoosen = false;
 const radius = 30;
 const padding = 5; // Extra space so they don't even get close
 
-function drawArrow(x1, y1, x2, y2, radius = 30) {
-  const headLength = 12;
+function drawArrow(x1, y1, x2, y2, radius = 30, color) {
+  var headLength = 12;
+  if(color==='white'){
+    headLength = 15;
+  }
   const angle = Math.atan2(y2 - y1, x2 - x1);
 
   // 1. Calculate the start and end points on the circles' perimeters
@@ -74,10 +77,13 @@ function drawArrow(x1, y1, x2, y2, radius = 30) {
   ctx.beginPath();
   ctx.moveTo(startX, startY);
   ctx.lineTo(endX, endY);
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = color;
+  if(color==='white'){
+    ctx.lineWidth = 3;
+  }else{
+    ctx.lineWidth = 2;
+  }
   ctx.stroke();
-
   // 3. Draw the arrowhead at the edge of the destination node
   ctx.beginPath();
   ctx.moveTo(endX, endY);
@@ -90,9 +96,11 @@ function drawArrow(x1, y1, x2, y2, radius = 30) {
     endY - headLength * Math.sin(angle + Math.PI / 6)
   );
   ctx.closePath();
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = color;
   ctx.fill();
 }
+
+var matrix = [];
 
 function drawEdge(nodeA, nodeB, color){
     const startNode = nodes[nodeA];
@@ -101,11 +109,11 @@ function drawEdge(nodeA, nodeB, color){
     if(!startNode || !endNode) return;
     
     if(isUnDirected){
-        drawArrow(startNode.x, startNode.y, endNode.x, endNode.y);
-        drawArrow(endNode.x, endNode.y, startNode.x, startNode.y);
+        drawArrow(startNode.x, startNode.y, endNode.x, endNode.y, 30, color);
+        drawArrow(endNode.x, endNode.y, startNode.x, startNode.y, 30, color);
     }
     else{
-        drawArrow(startNode.x, startNode.y, endNode.x, endNode.y);
+        drawArrow(startNode.x, startNode.y, endNode.x, endNode.y, 30, color);
     }
 }
 
@@ -138,7 +146,7 @@ function generateNonOverlappingNodes(n) {
         attempts++;
     }
 }
-function drawNode(x, y, radius, label){
+function drawNode(x, y, radius, label, curr=false){
     ctx.beginPath();
 
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
@@ -148,6 +156,14 @@ function drawNode(x, y, radius, label){
     if(startNodeChoosen){
         if(label===startNode){
             ctx.fillStyle = '#ff0000ff';
+            ctx.fill()
+        }
+
+        else if(curr){
+            ctx.fillStyle = '#00ff00ff';
+            ctx.fill()
+        }else{
+            ctx.fillStyle = '#ffffff';
             ctx.fill()
         }
     }
@@ -166,6 +182,7 @@ function drawNode(x, y, radius, label){
 
 
 const makeAdjMatrix = (n) => { 
+    
     const matrixDiv = document.getElementById('adjMatrix');
     matrixDiv.innerHTML = ""; // Clear previous content
     canvas.width = canvas.width;
@@ -222,7 +239,14 @@ console.log(slider)
 
 
 slider.addEventListener('change', function() {
+
+
     if(startNodeChoosen) return;
+    
+    matrix=[]
+    var n= parseInt(this.value);
+    matrix = Array.from({ length: n }, () => Array(n).fill(0));
+    
     nLabel.innerHTML="";
     var value = slider.value;
     nLabel.innerHTML = `Value of n is ${value}`;
@@ -249,28 +273,38 @@ const addFunctionalityToCells = () => {
         cell.addEventListener('click', function() {     
             var cellX = this.classList[1].split('#')[0];
             var cellY = this.classList[1].split('#')[1]; 
+
+            //  (x)------------>(y)
+
+
             
             const grayV = grayValue(this);
             console.log(grayV); 
             if(grayV===0) {
                 var newGrayV=255;
                 drawEdge(parseInt(cellX), parseInt(cellY), 'white')
+                matrix[cellX][cellY]=0;
+                if(!isUnDirected){
+                    drawEdge(parseInt(cellY), parseInt(cellX), 'black')
+                }
                 if(isUnDirected){
 
                     var symmetricCell = document.getElementsByClassName(cellY + '#' + cellX)[0];
                     symmetricCell.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
+                    matrix[cellY][cellX]=0;
                 }
             }
             else{
                 const step = 25.5;
-
                 var newGrayV = Math.max(0, grayV - step);
+                matrix[cellX][cellY]+=0.2;
                 console.log(newGrayV);
                 if(newGrayV===229.5){
                     drawEdge(parseInt(cellX), parseInt(cellY), 'black')
                 }
                 if(isUnDirected){
                     var symmetricCell = document.getElementsByClassName(cellY + '#' + cellX)[0];
+                    matrix[cellY][cellX]=((255 - grayV)/255)*2;
                     symmetricCell.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
                 }
                 
@@ -312,12 +346,79 @@ const addFunctionalityToCells = () => {
                 checkbox.disabled=true;
                 slider.disabled=true;
             }
+
+            Dijikstra(matrix, startNode);
+
         })
     })    
 
 
 }
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function Dijikstra(matrix, startNode) {
+    // Implementation of Dijkstra's algorithm will go here
+    console.log("Starting Dijkstra's Algorithm from node:", startNode);
+    const n = matrix.length;
+    const distances = Array(n).fill(Infinity);
+    const visited = Array(n).fill(false);
+    const parents = Array(n).fill(null);
+    distances[startNode] = 0;
+
+    for (let i = 0; i <= n - 1; i++) {
+        const u = minDistance(distances, visited);
+        if(u===-1 || distances[u] === Infinity) break; // All reachable nodes processed
+        visited[u] = true;
+        console.log("Visiting node:", u);
+        const NodeCurr = nodes[u];
+        drawNode(NodeCurr.x, NodeCurr.y, radius, u, true);
+
+        await sleep(1000); // Pause for visualization
+        for (let v = 0; v < n; v++) {
+            if(matrix[u][v] > 0 && !visited[v]) {
+                const weight = matrix[u][v];
+                const newDist = distances[u] + weight;
+                if (newDist < distances[v]) {
+                    distances[v] = newDist;
+                    parents[v] = u;
+                    updateTableUI(v, distances[v], u);
+                }
+            }
+        }
+        drawNode(NodeCurr.x, NodeCurr.y, radius, u, false);
+
+    
+    }
+} 
+
+function minDistance(distances, visited) {
+    let min = Infinity;
+    let minIndex = -1; 
+
+    for (let v = 0; v < distances.length; v++) {
+        if (!visited[v] && distances[v] <= min ) {
+            min = distances[v];
+            minIndex = v;
+        }
+    }
+    return minIndex;
+}
+
+
+function updateTableUI(node, distance, parent) {
+    const table = document.querySelector('#distancevisual table');
+    const rows = table.getElementsByTagName('tr');
+    for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+
+        if (parseInt(cells[0].innerText) === node) {
+            cells[1].innerText = distance === Infinity ? '∞' : distance;
+            cells[2].innerText = parent === null ? '-' : parent;
+            break;
+        }
+    }
+}
 
 
 addFunctionalityToCells();

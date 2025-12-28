@@ -263,7 +263,7 @@ checkbox.addEventListener('change', function() {
 
 
 const addFunctionalityToCells = () => {
-
+    console.log("Adding functionality to cells");
     if(startNodeChoosen) return ;
 
     startNodeChoosen = false;
@@ -276,13 +276,12 @@ const addFunctionalityToCells = () => {
 
             //  (x)------------>(y)
 
-
-            
+            console.log("Clicked cell:", cellX, cellY);            
             const grayV = grayValue(this);
-            console.log(grayV); 
             if(grayV===0) {
                 var newGrayV=255;
                 drawEdge(parseInt(cellX), parseInt(cellY), 'white')
+                this.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
                 matrix[cellX][cellY]=0;
                 if(!isUnDirected){
                     drawEdge(parseInt(cellY), parseInt(cellX), 'black')
@@ -297,19 +296,22 @@ const addFunctionalityToCells = () => {
             else{
                 const step = 25.5;
                 var newGrayV = Math.max(0, grayV - step);
+                this.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
                 matrix[cellX][cellY]+=0.2;
                 console.log(newGrayV);
                 if(newGrayV===229.5){
                     drawEdge(parseInt(cellX), parseInt(cellY), 'black')
                 }
                 if(isUnDirected){
+
+                    console.log("undirected edge");
                     var symmetricCell = document.getElementsByClassName(cellY + '#' + cellX)[0];
-                    matrix[cellY][cellX]=((255 - grayV)/255)*2;
+                    matrix[cellY][cellX]+=0.2;
                     symmetricCell.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
                 }
                 
             }
-            this.style.backgroundColor = `rgb(${newGrayV},${newGrayV},${newGrayV})`;
+            
             // var op
         })
 
